@@ -66,6 +66,18 @@ void deleteMin()
     heapifyDown(0);
 }
 
+int searchValue(int val)
+{
+    for (int i = 0; i < heapSize; i++)
+    {
+        if (heap[i] == val)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void deleteValue(int val)
 {
     if(heapSize == 0 )
@@ -73,15 +85,7 @@ void deleteValue(int val)
         cout<< " no element";
         return;
     }
-    int index = -1;
-    for ( int i = 0; i< heapSize; i++ )
-    {
-        if ( heap[i] == val)
-        {
-            index = i;
-            break;
-        }
-    }
+    int index = searchValue(val);
 
     if ( index == -1 )
     {
