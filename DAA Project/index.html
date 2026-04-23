@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binary Search Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="p-6 md:p-10">
+
+  <!-- Header -->
+  <div class="max-w-5xl mx-auto mb-10">
+    <div class="flex items-start justify-between flex-wrap gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-1">
+          <span class="tag">DAA / Unit 1</span>
+          <span class="tag">O(log n)</span>
+        </div>
+        <h1 class="text-4xl font-extrabold tracking-tight mt-2">Binary Search</h1>
+        <p class="text-sm mt-1" style="color:var(--muted)">Step-by-step visual demo — watch low, mid, high converge</p>
+      </div>
+      <div class="mono text-right" style="color:var(--muted); font-size:12px; line-height:2">
+        <div>Comparisons: <span id="cmp-count" class="font-bold" style="color:var(--text)">0</span></div>
+        <div>Max steps (log₂n): <span id="max-steps" class="font-bold" style="color:var(--text)">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Controls -->
+    <div style="background:var(--surface); border:1px solid var(--border);" class="rounded-2xl p-5">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold mb-1" style="color:var(--muted); letter-spacing:.06em;">SORTED ARRAY (comma-separated)</label>
+          <input type="text" id="array-input" value="3, 7, 12, 19, 25, 31, 38, 44, 50, 56, 63, 71, 80, 88, 97"
+            class="w-full rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1" style="color:var(--muted); letter-spacing:.06em;">SEARCH TARGET</label>
+          <input type="number" id="target-input" value="63"
+            class="w-full rounded-lg px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div class="flex gap-3 mt-4 flex-wrap">
+        <button onclick="initSearch()" class="btn-primary rounded-lg px-5 py-2 text-sm cursor-pointer">Initialize</button>
+        <button id="btn-next" onclick="nextStep()" class="btn-secondary rounded-lg px-5 py-2 text-sm cursor-pointer" disabled>Next Step →</button>
+        <button id="btn-auto" onclick="autoPlay()" class="btn-secondary rounded-lg px-5 py-2 text-sm cursor-pointer" disabled>Auto Play</button>
+        <button onclick="reset()" class="btn-secondary rounded-lg px-5 py-2 text-sm cursor-pointer ml-auto">Reset</button>
+      </div>
+    </div>
+
+    <!-- Result Banner -->
+    <div id="result-banner" class="hidden rounded-2xl p-4 text-center font-bold text-lg mono"></div>
+
+    <!-- Array Visualization -->
+    <div style="background:var(--surface); border:1px solid var(--border);" class="rounded-2xl p-6 overflow-x-auto">
+      <div id="array-visual" class="flex gap-2 justify-start md:justify-center items-end pb-2 pt-8" style="min-width: max-content; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex gap-6 flex-wrap justify-center text-xs mono" style="color:var(--muted)">
+      <span><span class="legend-dot mr-1" style="background:var(--low); box-shadow:0 0 6px rgba(59,130,246,0.5)"></span>low</span>
+      <span><span class="legend-dot mr-1" style="background:var(--mid); box-shadow:0 0 6px rgba(245,158,11,0.5)"></span>mid (checking)</span>
+      <span><span class="legend-dot mr-1" style="background:var(--high); box-shadow:0 0 6px rgba(239,68,68,0.5)"></span>high</span>
+      <span><span class="legend-dot mr-1" style="background:var(--found); box-shadow:0 0 6px rgba(34,197,94,0.5)"></span>found</span>
+      <span><span class="legend-dot mr-1" style="background:var(--eliminated); border:1px solid var(--border)"></span>eliminated</span>
+    </div>
+
+    <!-- Step Log -->
+    <div style="background:var(--surface); border:1px solid var(--border);" class="rounded-2xl p-5">
+      <h2 class="text-xs font-semibold mb-3" style="color:var(--muted); letter-spacing:.08em;">STEP LOG</h2>
+      <div id="step-log" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+        <p class="mono text-sm" style="color:var(--muted)">Initialize a search to begin.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div style="background:var(--surface); border:1px solid var(--border);" class="rounded-2xl p-5">
+      <h2 class="text-xs font-semibold mb-3" style="color:var(--muted); letter-spacing:.08em;">PSEUDOCODE</h2>
+      <pre class="mono text-xs leading-6" style="color:var(--muted)"><span style="color:#6b7bba">function</span> <span style="color:#f0f0f5">binarySearch</span>(arr, target):
+  low  ← <span style="color:var(--low)">0</span>
+  high ← <span style="color:var(--high)">arr.length - 1</span>
+
+  <span style="color:#6b7bba">while</span> low ≤ high:
+    mid ← <span style="color:var(--mid)">⌊(low + high) / 2⌋</span>
+
+    <span style="color:#6b7bba">if</span>   arr[mid] == target → <span style="color:var(--found)">return mid</span>
+    <span style="color:#6b7bba">elif</span> arr[mid]  &lt; target → low  ← mid + 1
+    <span style="color:#6b7bba">else</span>                   → high ← mid - 1
+
+  <span style="color:var(--high)">return -1  // not found</span></pre>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
